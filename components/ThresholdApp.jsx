@@ -1326,12 +1326,12 @@ export default function Threshold() {
   }
 
   let body;
-  if (screen === "home") body = <HomeScreen />;
-  else if (screen === "free") body = <FreeScreen />;
-  else if (screen === "guided") body = <GuidedScreen />;
-  else if (screen === "loading") body = <LoadingScreen />;
-  else if (screen === "result") body = <ResultScreen />;
-  else if (screen === "history") body = <HistoryScreen />;
+  if (screen === "home") body = HomeScreen();
+  else if (screen === "free") body = FreeScreen();
+  else if (screen === "guided") body = GuidedScreen();
+  else if (screen === "loading") body = LoadingScreen();
+  else if (screen === "result") body = ResultScreen();
+  else if (screen === "history") body = HistoryScreen();
 
   return (
     <div style={page}>
