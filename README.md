@@ -23,6 +23,26 @@ Nothing else did — same colors, same type, same screens, same logic.
    requests now go through `app/api/guidance/route.js`, a small server
    route that holds your key privately.
 
+## Firebase setup (accounts + database)
+
+The app runs fine without this — it just won't offer accounts until it's done.
+
+1. Go to https://console.firebase.google.com and create a project
+2. In the project, go to **Build > Authentication**, click **Get started**, and enable **Email/Password** and **Google** as sign-in providers
+3. Go to **Build > Firestore Database**, click **Create database**, start in production mode
+4. In Firestore, go to the **Rules** tab and paste in the contents of `firestore.rules` from this repo, then **Publish**
+5. Go to **Project settings** (gear icon) > scroll to **Your apps** > click the web icon (`</>`) to register a web app
+6. Copy the config values shown into your `.env.local` (or Vercel environment variables):
+   - `NEXT_PUBLIC_FIREBASE_API_KEY`
+   - `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
+   - `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
+   - `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
+   - `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
+   - `NEXT_PUBLIC_FIREBASE_APP_ID`
+7. Redeploy. A "Sign in" link will now work in the app header.
+
+Note: journal data still saves to `localStorage` at this stage — accounts exist, but nothing is migrated to Firestore yet. That's the next step.
+
 ## Setup
 
 ```bash

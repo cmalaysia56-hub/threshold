@@ -16,6 +16,7 @@ import {
   Trash2,
   Check,
   Bell,
+  User,
 } from "lucide-react";
 import {
   GROUND,
@@ -35,6 +36,8 @@ import {
   FONTS,
 } from "../lib/theme";
 import { storage } from "../lib/storage";
+import { useAuth } from "../lib/auth-context";
+import AuthModal from "./AuthModal";
 
 const AREAS = [
   "Relationships",
@@ -252,6 +255,8 @@ function CrisisBanner({ onDismiss }) {
    ------------------------------------------------------------ */
 
 export default function Threshold() {
+  const { user, signOutUser } = useAuth();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const [screen, setScreen] = useState("home"); // home | free | guided | loading | result | history
   const [area, setArea] = useState(null);
   const [freeText, setFreeText] = useState("");
@@ -542,6 +547,26 @@ export default function Threshold() {
             Journal
           </button>
         )}
+        <button
+          onClick={() => (user ? signOutUser() : setAuthModalOpen(true))}
+          aria-label={user ? "Sign out" : "Sign in"}
+          title={user ? user.email : "Sign in"}
+          style={{
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            color: user ? EMBER : MUTED,
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            fontSize: 13,
+            fontFamily: "'Inter', sans-serif",
+            marginLeft: 14,
+          }}
+        >
+          <User size={16} />
+          {user ? "Sign out" : "Sign in"}
+        </button>
       </div>
     </div>
   );
@@ -1360,6 +1385,7 @@ export default function Threshold() {
         {header}
         {body}
       </div>
+      {authModalOpen && <AuthModal onClose={() => setAuthModalOpen(false)} />}
     </div>
   );
 }
