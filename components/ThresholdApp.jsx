@@ -308,7 +308,7 @@ export default function Threshold() {
 
   useEffect(() => {
     loadHistory();
-  }, [loadHistory]);
+  }, [loadHistory, user]);
 
   function resetFlow() {
     setArea(null);
