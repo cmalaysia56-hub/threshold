@@ -9,10 +9,12 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
 } from "firebase/auth";
-import { auth, isConfigured } from "./firebase";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db, isConfigured } from "./firebase";
 
 const AuthContext = createContext({
   user: null,
+  isAdmin: false,
   loading: false,
   authEnabled: false,
   signUp: async () => {},
@@ -23,8 +25,7 @@ const AuthContext = createContext({
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  // Starts "loading" only if Firebase is actually configured — otherwise
-  // there's nothing to wait on, and the app renders immediately as before.
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(isConfigured);
 
   useEffect(() => {
@@ -32,10 +33,27 @@ export function AuthProvider({ children }) {
       setLoading(false);
       return;
     }
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
+      if (firebaseUser) {
+        try {
+          const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
+          if (userDoc.exists()) {
+            setIsAdmin(userDoc.data().isAdmin === true);
+          } else {
+            setIsAdmin(false);
+          }
+        } catch (error) {
+          console.error("Error checking admin status:", error);
+          setIsAdmin(false);
+        }
+      } else {
+        setIsAdmin(false);
+      }
       setLoading(false);
     });
+
     return () => unsubscribe();
   }, []);
 
@@ -56,27 +74,22 @@ export function AuthProvider({ children }) {
   }
 
   async function signOutUser() {
-    if (!auth) return;
+    if (!auth) throw new Error("Accounts aren't set up yet.");
     return firebaseSignOut(auth);
   }
 
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        loading,
-        authEnabled: isConfigured,
-        signUp,
-        signIn,
-        signInWithGoogle,
-        signOutUser,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+  const value = {
+    user,
+    isAdmin,
+    loading,
+    authEnabled: isConfigured,
+    signUp,
+    signIn,
+    signInWithGoogle,
+    signOutUser,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-export function useAuth() {
-  return useContext(AuthContext);
-}
+export const useAuth = () => useContext(AuthContext);
