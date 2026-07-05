@@ -2,24 +2,30 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-
+    
     // Each user can only read/write documents under their own uid.
-    // This is where journal entries, follow-ups, and saved prayers will
-    // live once step 2 (migrating storage to Firestore) is done.
     match /users/{userId}/{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
+    
+    // Admin specific rules - checking the isAdmin field in the user's doc
+    match /admin/{document=**} {
+      allow read, write: if request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+
+    // Allow admins to read all user documents for management purposes
+    match /users/{userId} {
+       allow read: if request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
 
     // Aggregated analytics data is never written or read directly by
-    // clients — only the server (via the Firebase Admin SDK, using a
-    // service account) can touch this collection. The admin dashboard
-    // reads through a server-side API route, not directly from the
-    // client, so this stays locked down entirely.
+    // clients - only the server (via the Firebase Admin SDK)
     match /analytics/{document=**} {
       allow read, write: if false;
     }
 
-    // Default deny for anything not explicitly matched above.
     match /{document=**} {
       allow read, write: if false;
     }
