@@ -257,7 +257,6 @@ function CrisisBanner({ onDismiss }) {
 export default function Threshold() {
   const { user, signOutUser } = useAuth();
   const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [saveError, setSaveError] = useState(null);
   const [screen, setScreen] = useState("home"); // home | free | guided | loading | result | history
   const [area, setArea] = useState(null);
   const [freeText, setFreeText] = useState("");
@@ -368,7 +367,6 @@ export default function Threshold() {
 
   async function saveCurrentReflection() {
     if (!result || !pendingMeta) return;
-    setSaveError(null);
     try {
       const id = currentReflectionId || `reflections:${Date.now()}`;
       const savedAt = currentSavedAt || new Date().toISOString();
@@ -388,8 +386,7 @@ export default function Threshold() {
         loadHistory();
       }
     } catch (e) {
-      console.error("Failed to save reflection:", e);
-      setSaveError(e?.message || "Couldn't save right now — try again in a moment.");
+      /* silent — saving is a nicety, not the core function */
     }
   }
 
@@ -1228,11 +1225,6 @@ export default function Threshold() {
         })()}
 
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {saveError && (
-            <p style={{ color: "#E0313D", fontSize: 13, margin: "0 0 4px", textAlign: "center" }}>
-              {saveError}
-            </p>
-          )}
           <GhostButton
             onClick={saveCurrentReflection}
             icon={<Bookmark size={16} color={savedThisResult ? EMBER : PARCHMENT} fill={savedThisResult ? EMBER : "none"} />}
