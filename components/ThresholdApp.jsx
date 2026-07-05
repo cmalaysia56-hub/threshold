@@ -256,6 +256,9 @@ function CrisisBanner({ onDismiss }) {
 
 export default function Threshold() {
   const { user, signOutUser } = useAuth();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+  const displayUser = mounted ? user : null;
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [screen, setScreen] = useState("home"); // home | free | guided | loading | result | history
   const [area, setArea] = useState(null);
@@ -549,13 +552,13 @@ export default function Threshold() {
         )}
         <button
           onClick={() => (user ? signOutUser() : setAuthModalOpen(true))}
-          aria-label={user ? "Sign out" : "Sign in"}
-          title={user ? user.email : "Sign in"}
+          aria-label={displayUser ? "Sign out" : "Sign in"}
+         title={displayUser ? displayUser.email : "Sign in"}
           style={{
             background: "none",
             border: "none",
             cursor: "pointer",
-            color: user ? EMBER : MUTED,
+           color: displayUser ? EMBER : MUTED,
             display: "flex",
             alignItems: "center",
             gap: 6,
@@ -565,7 +568,7 @@ export default function Threshold() {
           }}
         >
           <User size={16} />
-          {user ? "Sign out" : "Sign in"}
+         {displayUser ? "Sign out" : "Sign in"}
         </button>
       </div>
     </div>
